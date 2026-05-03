@@ -1,7 +1,10 @@
 import React from 'react';
 import './LandingPage.css';
+import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
+   const navigate = useNavigate();
+
   return (
     <>
     <div className="app-wrapper">
@@ -12,7 +15,7 @@ function LandingPage() {
           <h1>Optimize Your Resume for <span>ATS Success.</span></h1>
           <p>Beat the bots and land more interviews with our precise analysis. Get your ATS score in seconds.</p>
           <div className="hero-btns">
-            <button className="btn-primary">Upload and Scan</button>
+            <button className="btn-primary" onClick={() => navigate('/analysis')}>Upload and Scan</button>
             <button className="btn-secondary">View Demo</button>
           </div>
         </div>
@@ -32,7 +35,7 @@ function LandingPage() {
             </div>
             <h3>Upload Resume</h3>
             <p>Securely drag and drop your PDF or DocX file for instant parsing.</p>
-            <a href="#">Learn more →</a>
+            <a  onClick={() => navigate('/analysis')}>Learn more →</a>
           </div>
 
           <div className="feature-card" style={{ background: "#ffffff" }}>
@@ -41,7 +44,7 @@ function LandingPage() {
             </div>
             <h3>ATS Score</h3>
             <p>Instant scoring based on 50+ critical metrics used by top companies.</p>
-            <a href="#">Learn more →</a>
+            <a onClick={() => navigate('/analysis')}>Learn more →</a>
           </div>
 
           <div className="feature-card" style={{ background: "#ffffff" }}>
@@ -50,7 +53,7 @@ function LandingPage() {
             </div>
             <h3>Feedback Suggestions</h3>
             <p>Get personalized bullet-point suggestions to improve wording.</p>
-            <a href="#">Learn more →</a>
+            <a onClick={() => navigate('/career-tips')}>Learn more →</a>
           </div>
         </div>
       </section>
@@ -64,7 +67,7 @@ function LandingPage() {
           <div className="cta-card">
             <h3>Ready to land your dream job?</h3>
             <p>Join thousands of professionals who have used RankMyCV to double <br/>their callback rates.</p>
-            <button className="white-btn">Upload Now</button>
+            <button className="white-btn" onClick={() => navigate('/analysis')}>Upload Now</button>
           </div>
         </div>
       </div>
