@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Analysis.css";
+import { uploadResume } from "../../api/resumeApi";
 
 const Analysis = () => {
   const [file, setFile] = useState(null);
@@ -21,69 +22,33 @@ const Analysis = () => {
 
     setLoading(true);
     setReport(null);
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result.split(",")[1];
-      const mediaType = file.type;
-
-      try {
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json"},
-          body: JSON.stringify({
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 1000,
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "document",
-                    source: { type: "base64", media_type: mediaType, data: base64 },
-                  },
-                  {
-                    type: "text",
-                    text: `Job Description:\n${jobDescription}\n\nAnalyze this resume for ATS compatibility against the job description above. Return ONLY a valid JSON object with no markdown, no explanation. Use this exact structure:
-{
-  "atsScore": <number 0-100>,
-  "alignment": "<Strong Alignment | Moderate Alignment | Weak Alignment>",
-  "alignmentNote": "<one sentence>",
-  "keywordsMatched": <number>,
-  "keywordsTotal": <number>,
-  "formattingDepth": "<Optimal | Moderate | Poor>",
-  "formattingStatus": "<PASSED | NEEDS WORK | FAILED>",
-  "softSkillsImpact": "<High | Medium | Low>",
-  "criticalRedFlags": <number>,
-  "criticalFeedback": [
-    { "title": "<issue title>", "description": "<description>", "fix": "<example fix>" }
-  ],
-  "contentStrength": [
-    { "label": "<Contact Information | Section Headings | Education Context | Work Experience | Skills>", "status": "<Full Scannability | Standardized | Matches Requirements | Needs Work | Missing>" }
-  ]
-}`,
-                  },
-                ],
-              },
-            ],
-          }),
-        });
-
-        const data = await response.json();
-        const text = data.content?.map((c) => c.text || "").join("") || "";
-        const clean = text.replace(/```json|```/g, "").trim();
-        const parsed = JSON.parse(clean);
-        setReport(parsed);
-      } catch (err) {
-        setError("Failed to analyze resume. Please try again.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    reader.readAsDataURL(file);
+try {
+      const data = await uploadResume(file, jobDescription);
+      setReport({
+        atsScore: data.score,
+        alignment: data.score >= 75 ? "Strong Alignment" : data.score >= 50 ? "Moderate Alignment" : "Weak Alignment",
+        alignmentNote: data.feedback,
+        keywordsMatched: data.score,
+        keywordsTotal: 100,
+        formattingDepth: "Moderate",
+        formattingStatus: data.score >= 60 ? "PASSED" : "NEEDS WORK",
+        softSkillsImpact: data.score >= 75 ? "High" : data.score >= 50 ? "Medium" : "Low",
+        criticalRedFlags: data.score < 60 ? 1 : 0,
+        criticalFeedback: [{ title: "Keyword Optimization", description: data.feedback, fix: "Add more relevant keywords." }],
+        contentStrength: [
+          { label: "Contact Information", status: "Full Scannability" },
+          { label: "Work Experience", status: data.score >= 60 ? "Matches Requirements" : "Needs Work" },
+          { label: "Skills", status: data.score >= 75 ? "Matches Requirements" : "Needs Work" },
+        ],
+      });
+    } catch (err) {
+      setError("Backend error. Make sure server is running on port 5000.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
+    
 
   const getScoreColor = (score) => {
     if (score >= 75) return "#6c3fc5";
