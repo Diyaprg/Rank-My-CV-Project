@@ -20,30 +20,59 @@ const upload = multer({ storage });
 
 // ATS Score function
 const calculateScore = (resume, jd) => {
-    const cleanText = (text) => text
-        .toLowerCase()
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/[^a-z0-9\s]/g, " ")
-        .split(/\s+/)
-        .filter(word => word.length > 2);
 
-    const resumeWords = cleanText(resume);
-    const jdWords = cleanText(jd);
+    const cleanText = (text) => {
+        return text
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9 ]/g, "")
+            .split(" ")
+            .filter(word => word.length > 2);
+    };
 
-    console.log("Resume words sample:", resumeWords.slice(0, 20));
-    console.log("JD words:", jdWords);
-
-    if (jdWords.length === 0) return 0;
+    const resumeWords = [...new Set(cleanText(resume))];
+    const jdWords = [...new Set(cleanText(jd))];
 
     let matchCount = 0;
+
     jdWords.forEach(word => {
         if (resumeWords.includes(word)) {
             matchCount++;
         }
     });
 
-    console.log("Match count:", matchCount, "out of", jdWords.length);
     return Math.round((matchCount / jdWords.length) * 100);
+};
+
+const getMatchedKeywords = (resume, jd) => {
+
+    const cleanText = (text) => {
+        return text
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9 ]/g, "")
+            .split(" ")
+            .filter(word => word.length > 2);
+    };
+
+    const resumeWords = [...new Set(cleanText(resume))];
+    const jdWords = [...new Set(cleanText(jd))];
+
+    return jdWords.filter(word => resumeWords.includes(word));
+};
+
+const getMissingKeywords = (resume, jd) => {
+
+    const cleanText = (text) => {
+        return text
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9 ]/g, "")
+            .split(" ")
+            .filter(word => word.length > 2);
+    };
+
+    const resumeWords = [...new Set(cleanText(resume))];
+    const jdWords = [...new Set(cleanText(jd))];
+
+    return jdWords.filter(word => !resumeWords.includes(word));
 };
 
 // Single upload route
@@ -72,10 +101,18 @@ router.post("/upload", upload.single("resume"), async (req, res) => {
             return "Add more relevant keywords";
         };
 
+        const missingKeywords = getMissingKeywords(resumeText, jobDescription);
+        const matchedKeywords = getMatchedKeywords(resumeText, jobDescription);
+        
+        
+
         res.json({
             message: "Resume processed successfully",
             score,
             feedback: generateFeedback(score),
+            missingKeywords,
+            matchedKeywords,
+            totalKeywords: matchedKeywords.length + missingKeywords.length,
             resumeText,
             jobDescription
         });

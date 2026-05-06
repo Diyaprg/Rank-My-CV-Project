@@ -28,19 +28,28 @@ try {
         atsScore: data.score,
         alignment: data.score >= 75 ? "Strong Alignment" : data.score >= 50 ? "Moderate Alignment" : "Weak Alignment",
         alignmentNote: data.feedback,
-        keywordsMatched: data.score,
-        keywordsTotal: 100,
-        formattingDepth: "Moderate",
-        formattingStatus: data.score >= 60 ? "PASSED" : "NEEDS WORK",
+        keywordsMatched: data.matchedKeywords.length,
+        keywordsTotal: data.totalKeywords,
+        formattingDepth:data.score >= 75? "Excellent": data.score >= 50? "Moderate": "Poor",
+        formattingStatus: data.score >= 75 ? "PASSED" : "NEEDS WORK",
         softSkillsImpact: data.score >= 75 ? "High" : data.score >= 50 ? "Medium" : "Low",
-        criticalRedFlags: data.score < 60 ? 1 : 0,
-        criticalFeedback: [{ title: "Keyword Optimization", description: data.feedback, fix: "Add more relevant keywords." }],
+        criticalRedFlags: data.score < 75 ? 1 : 0,
+        criticalFeedback: [{ title: "Keyword Optimization", description: data.feedback, fix:data.missingKeywords.length > 0? `Add keywords like: ${data.missingKeywords.slice(0,5).join(", ")}`: "Excellent keyword optimization" }],
+        missingKeywords: data.missingKeywords,
         contentStrength: [
           { label: "Contact Information", status: "Full Scannability" },
-          { label: "Work Experience", status: data.score >= 60 ? "Matches Requirements" : "Needs Work" },
+          { label: "Work Experience", status: data.score >= 75 ? "Matches Requirements" : "Needs Work" },
           { label: "Skills", status: data.score >= 75 ? "Matches Requirements" : "Needs Work" },
         ],
       });
+      localStorage.setItem("atsReport",
+          JSON.stringify({
+          score: data.score,
+          feedback: data.feedback,
+          missingKeywords: data.missingKeywords,
+          matchedKeywords: data.matchedKeywords
+  })
+);
     } catch (err) {
       setError("Backend error. Make sure server is running on port 5000.");
       console.error(err);
@@ -216,6 +225,17 @@ try {
                   )}
                 </div>
               ))}
+              {/* Missing Keywords */}
+              <div className="feedback-card">
+                  <h3>Missing Keywords</h3>
+
+               <div className="keywords-container">
+                    {report.missingKeywords &&report.missingKeywords.map((word, i) => (
+                    <span key={i} className="keyword-badge">{word}
+             </span>
+      ))}
+  </div>
+</div>
             </div>
 
             {/* Content Strength */}
