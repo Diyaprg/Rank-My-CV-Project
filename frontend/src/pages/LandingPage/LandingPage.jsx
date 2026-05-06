@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import './LandingPage.css';
 import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
    const navigate = useNavigate();
+
+     const featuresRef = useRef(null);
+
+  const scrollToFeatures = () => {
+    featuresRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
 
   return (
     <>
@@ -14,17 +23,21 @@ function LandingPage() {
         <div className="hero-text">
           <h1>Optimize Your Resume for <span>ATS Success.</span></h1>
           <p>Beat the bots and land more interviews with our precise analysis. Get your ATS score in seconds.</p>
+          
           <div className="hero-btns">
             <button className="btn-primary" onClick={() => navigate('/analysis')}>Upload and Scan</button>
-            <button className="btn-secondary">View Demo</button>
+            <button className="btn-secondary"
+             className="btn-secondary"
+              onClick={scrollToFeatures}>Explore</button>
           </div>
         </div>
+        
         <div className="hero-img-container">
           <img src="/images/9846834.jpg" alt="App Dashboard" className="hero-img" />
         </div>
       </header>
       
-      <section className="features">
+      <section className="features" ref={featuresRef}>
         <h2>Three Steps to Perfection</h2>
         <p className="features-sub">Our intelligent engine parses your CV like a real hiring manager would.</p>
         <div className="feature-grid">

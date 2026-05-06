@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "./Analysis.css";
 import { uploadResume } from "../../api/resumeApi";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const Analysis = () => {
   const [file, setFile] = useState(null);
@@ -8,6 +10,7 @@ const Analysis = () => {
   const [report, setReport] = useState(null);
   const [error, setError] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const reportRef = useRef(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -22,34 +25,25 @@ const Analysis = () => {
 
     setLoading(true);
     setReport(null);
-try {
+    try {
       const data = await uploadResume(file, jobDescription);
       setReport({
         atsScore: data.score,
         alignment: data.score >= 75 ? "Strong Alignment" : data.score >= 50 ? "Moderate Alignment" : "Weak Alignment",
         alignmentNote: data.feedback,
-        keywordsMatched: data.matchedKeywords.length,
-        keywordsTotal: data.totalKeywords,
-        formattingDepth:data.score >= 75? "Excellent": data.score >= 50? "Moderate": "Poor",
-        formattingStatus: data.score >= 75 ? "PASSED" : "NEEDS WORK",
+        keywordsMatched: data.score,
+        keywordsTotal: 100,
+        formattingDepth: "Moderate",
+        formattingStatus: data.score >= 60 ? "PASSED" : "NEEDS WORK",
         softSkillsImpact: data.score >= 75 ? "High" : data.score >= 50 ? "Medium" : "Low",
-        criticalRedFlags: data.score < 75 ? 1 : 0,
-        criticalFeedback: [{ title: "Keyword Optimization", description: data.feedback, fix:data.missingKeywords.length > 0? `Add keywords like: ${data.missingKeywords.slice(0,5).join(", ")}`: "Excellent keyword optimization" }],
-        missingKeywords: data.missingKeywords,
+        criticalRedFlags: data.score < 60 ? 1 : 0,
+        criticalFeedback: [{ title: "Keyword Optimization", description: data.feedback, fix: "Add more relevant keywords." }],
         contentStrength: [
           { label: "Contact Information", status: "Full Scannability" },
-          { label: "Work Experience", status: data.score >= 75 ? "Matches Requirements" : "Needs Work" },
+          { label: "Work Experience", status: data.score >= 60 ? "Matches Requirements" : "Needs Work" },
           { label: "Skills", status: data.score >= 75 ? "Matches Requirements" : "Needs Work" },
         ],
       });
-      localStorage.setItem("atsReport",
-          JSON.stringify({
-          score: data.score,
-          feedback: data.feedback,
-          missingKeywords: data.missingKeywords,
-          matchedKeywords: data.matchedKeywords
-  })
-);
     } catch (err) {
       setError("Backend error. Make sure server is running on port 5000.");
       console.error(err);
@@ -57,7 +51,7 @@ try {
       setLoading(false);
     }
   };
-    
+
 
   const getScoreColor = (score) => {
     if (score >= 75) return "#6c3fc5";
@@ -68,38 +62,38 @@ try {
   const circumference = 2 * Math.PI * 45;
 
   return (
-  <div className="analysis-page">
-    {!report && !loading && (
-      <div className="upload-section">
-        <h1>Analysis Report</h1>
-        <p>Upload your resume to get an ATS compatibility analysis.</p>
-        <div className="upload-box">
-          <div className="jd-section">
-            <label className="jd-label">Paste the Job Description</label>
-            <textarea
-              className="jd-textarea"
-              placeholder="Paste the job description here to get a tailored ATS analysis..."
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              rows={6}
+    <div className="analysis-page">
+      {!report && !loading && (
+        <div className="upload-section" id="upload-section">
+          <h1>Analysis Report</h1>
+          <p>Upload your resume to get an ATS compatibility analysis.</p>
+          <div className="upload-box">
+            <div className="jd-section">
+              <label className="jd-label">Paste the Job Description</label>
+              <textarea
+                className="jd-textarea"
+                placeholder="Paste the job description here to get a tailored ATS analysis..."
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                rows={6}
+              />
+            </div>
+            <label className="upload-file-label">Upload Your Resume (PDF or DOCX)</label>
+            <input
+              type="file"
+              accept=".pdf,.docx"
+              onChange={handleFileChange}
+              id="resume-upload"
             />
+            <label htmlFor="resume-upload" className="upload-label">
+              {file ? `📄 ${file.name}` : "📁 Click to upload PDF or DOCX"}
+            </label>
+            {error && <p className="error-text">{error}</p>}
+            <button className="analyze-btn" onClick={handleAnalyze}>
+              Submit
+            </button>
           </div>
-          <label className="upload-file-label">Upload Your Resume (PDF or DOCX)</label>
-          <input
-            type="file"
-            accept=".pdf,.docx"
-            onChange={handleFileChange}
-            id="resume-upload"
-          />
-          <label htmlFor="resume-upload" className="upload-label">
-            {file ? `📄 ${file.name}` : "📁 Click to upload PDF or DOCX"}
-          </label>
-          {error && <p className="error-text">{error}</p>}
-          <button className="analyze-btn" onClick={handleAnalyze}>
-            Submit
-          </button>
         </div>
-      </div>
       )}
 
       {loading && (
@@ -110,7 +104,7 @@ try {
       )}
 
       {report && (
-        <div className="report-section">
+        <div className="report-section" ref={reportRef}>
           <h1>Analysis Report</h1>
           <p className="report-subtitle">
             Your resume was analyzed against industry-standard ATS benchmarks.
@@ -166,9 +160,8 @@ try {
               <p className="card-label">Formatting Depth</p>
               <p className="card-value">{report.formattingDepth}</p>
               <span
-                className={`badge ${
-                  report.formattingStatus === "PASSED" ? "badge-green" : "badge-red"
-                }`}
+                className={`badge ${report.formattingStatus === "PASSED" ? "badge-green" : "badge-red"
+                  }`}
               >
                 {report.formattingStatus}
               </span>
@@ -187,8 +180,8 @@ try {
                       report.softSkillsImpact === "High"
                         ? "90%"
                         : report.softSkillsImpact === "Medium"
-                        ? "55%"
-                        : "25%",
+                          ? "55%"
+                          : "25%",
                   }}
                 ></div>
               </div>
@@ -225,17 +218,6 @@ try {
                   )}
                 </div>
               ))}
-              {/* Missing Keywords */}
-              <div className="feedback-card">
-                  <h3>Missing Keywords</h3>
-
-               <div className="keywords-container">
-                    {report.missingKeywords &&report.missingKeywords.map((word, i) => (
-                    <span key={i} className="keyword-badge">{word}
-             </span>
-      ))}
-  </div>
-</div>
             </div>
 
             {/* Content Strength */}
