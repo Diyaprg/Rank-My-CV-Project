@@ -304,6 +304,16 @@ const Suggestion = () => {
             </ul>
 
           </div>
+          {/* AI Insights */}
+            <div className="tips-card">
+
+               <h2>AI Resume Insights</h2>
+
+                 <p className="ai-feedback">
+                      {report?.aiFeedback}
+                 </p>
+
+            </div>
 
           {/* Recommended Skills */}
           <div className="tips-card">

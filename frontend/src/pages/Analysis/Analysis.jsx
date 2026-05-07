@@ -36,6 +36,7 @@ try {
         criticalRedFlags: data.score < 75 ? 1 : 0,
         criticalFeedback: [{ title: "Keyword Optimization", description: data.feedback, fix:data.missingKeywords.length > 0? `Add keywords like: ${data.missingKeywords.slice(0,5).join(", ")}`: "Excellent keyword optimization" }],
         missingKeywords: data.missingKeywords,
+        aiFeedback: data.aiFeedback,
         contentStrength: [
           { label: "Contact Information", status: "Full Scannability" },
           { label: "Work Experience", status: data.score >= 75 ? "Matches Requirements" : "Needs Work" },
@@ -47,9 +48,10 @@ try {
           score: data.score,
           feedback: data.feedback,
           missingKeywords: data.missingKeywords,
-          matchedKeywords: data.matchedKeywords
-  })
-);
+          matchedKeywords: data.matchedKeywords,
+          aiFeedback: data.aiFeedback
+        })
+      );
     } catch (err) {
       setError("Backend error. Make sure server is running on port 5000.");
       console.error(err);

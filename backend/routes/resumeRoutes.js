@@ -3,6 +3,7 @@ const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const fs = require("fs");
 const Resume = require("../models/Resume");
+const generateGeminiFeedback =require("../utils/geminiFeedback");
 
 const router = express.Router();
 
@@ -75,6 +76,7 @@ const getMissingKeywords = (resume, jd) => {
     return jdWords.filter(word => !resumeWords.includes(word));
 };
 
+
 // Single upload route
 router.post("/upload", upload.single("resume"), async (req, res) => {
     try {
@@ -88,8 +90,7 @@ router.post("/upload", upload.single("resume"), async (req, res) => {
         const data = await pdfParse(dataBuffer);
         const resumeText = data.text;
 
-        console.log("Extracted text:", resumeText.substring(0, 200));
-        console.log("Job Description:", jobDescription);
+        
 
         const score = calculateScore(resumeText, jobDescription);
 
@@ -100,10 +101,16 @@ router.post("/upload", upload.single("resume"), async (req, res) => {
             if (score > 60) return "Good resume but needs improvement";
             return "Add more relevant keywords";
         };
+       
 
         const missingKeywords = getMissingKeywords(resumeText, jobDescription);
         const matchedKeywords = getMatchedKeywords(resumeText, jobDescription);
-        
+         const aiFeedback =await generateGeminiFeedback(
+            score,
+            missingKeywords,
+            matchedKeywords
+        );
+
         
 
         res.json({
@@ -112,6 +119,7 @@ router.post("/upload", upload.single("resume"), async (req, res) => {
             feedback: generateFeedback(score),
             missingKeywords,
             matchedKeywords,
+            aiFeedback,
             totalKeywords: matchedKeywords.length + missingKeywords.length,
             resumeText,
             jobDescription

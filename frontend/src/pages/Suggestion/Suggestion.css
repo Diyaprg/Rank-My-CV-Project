@@ -272,6 +272,12 @@
   .ats-section {
     grid-template-columns: 1fr;
   }
+  
+  .ai-feedback {
+  line-height: 1.8;
+  color: #334155;
+  white-space: pre-line;
+}
 
   .card,
   .tips-card {
