@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     color: var(--navy);
@@ -308,6 +312,7 @@ body {
 .btn-secondary {
     font-family: 'Inter', sans-serif;
     background: white;
+    font-size: 0.9rem;
     color: var(--slate-dark);
     padding: 15px 20px;
     border-radius: 12px;
