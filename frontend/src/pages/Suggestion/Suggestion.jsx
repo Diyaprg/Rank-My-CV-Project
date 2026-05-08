@@ -234,7 +234,7 @@ const Suggestion = () => {
       {/* ATS Insights */}
       {report && (
 
-        <div className="ats-section">
+        <div className="ats-section"  id="ats-analysis">
 
           {/* Missing Keywords */}
           <div className="tips-card">

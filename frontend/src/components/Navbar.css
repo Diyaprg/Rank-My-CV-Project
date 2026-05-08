@@ -61,7 +61,7 @@
   background: var(--grad-primary);
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 15px;
   border-radius: 50px;
   font-weight: 600;
 }
@@ -151,7 +151,7 @@
 
 @media (max-width: 768px) {
   .hamburger {
-    display: flex !important;  /* ← force show on mobile */
+    display: flex !important; 
     align-items: center;
     justify-content: center;
   }

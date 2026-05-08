@@ -3,6 +3,7 @@ import "./Analysis.css";
 import { uploadResume } from "../../api/resumeApi";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useNavigate } from "react-router-dom";
 
 const Analysis = () => {
   const [file, setFile] = useState(null);
@@ -11,6 +12,7 @@ const Analysis = () => {
   const [error, setError] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const reportRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -41,8 +43,8 @@ const Analysis = () => {
           data.score >= 75
             ? "Strong Alignment"
             : data.score >= 50
-            ? "Moderate Alignment"
-            : "Weak Alignment",
+              ? "Moderate Alignment"
+              : "Weak Alignment",
 
         alignmentNote:
           data.feedback,
@@ -66,8 +68,8 @@ const Analysis = () => {
           data.score >= 75
             ? "High"
             : data.score >= 50
-            ? "Medium"
-            : "Low",
+              ? "Medium"
+              : "Low",
 
         criticalRedFlags:
           data.score < 75 ? 1 : 0,
@@ -86,8 +88,8 @@ const Analysis = () => {
               data.missingKeywords.length > 0
 
                 ? `Add keywords like: ${data.missingKeywords
-                    .slice(0, 5)
-                    .join(", ")}`
+                  .slice(0, 5)
+                  .join(", ")}`
 
                 : "Excellent keyword optimization"
 
@@ -291,13 +293,21 @@ const Analysis = () => {
           ref={reportRef}
         >
 
-          <h1>Analysis Report</h1>
+          <div className="report-header">
+            <div>
+              <h1>Analysis Report</h1>
+              <p className="report-subtitle">
+                Your resume was analyzed against industry-standard ATS benchmarks.
+              </p>
+            </div>
 
-          <p className="report-subtitle">
-
-            Your resume was analyzed against industry-standard ATS benchmarks.
-
-          </p>
+            <button
+              className="ai-analysis-btn"
+              onClick={() => navigate("/career-tips#ats-analysis")}
+            >
+              ✨ View AI Analysis
+            </button>
+          </div>
 
           {/* Score Cards */}
 
@@ -427,11 +437,10 @@ const Analysis = () => {
               </p>
 
               <span
-                className={`badge ${
-                  report.formattingStatus === "PASSED"
+                className={`badge ${report.formattingStatus === "PASSED"
                     ? "badge-green"
                     : "badge-red"
-                }`}
+                  }`}
               >
 
                 {report.formattingStatus}
@@ -467,8 +476,8 @@ const Analysis = () => {
                       report.softSkillsImpact === "High"
                         ? "90%"
                         : report.softSkillsImpact === "Medium"
-                        ? "55%"
-                        : "25%"
+                          ? "55%"
+                          : "25%"
 
                   }}
                 ></div>
@@ -567,36 +576,36 @@ const Analysis = () => {
             {/* Missing Resume Sections */}
 
             {report.missingSections &&
-            report.missingSections.length > 0 && (
+              report.missingSections.length > 0 && (
 
-              <div className="missing-sections-section">
+                <div className="missing-sections-section">
 
-                <h2>
-                  Missing Resume Sections
-                </h2>
+                  <h2>
+                    Missing Resume Sections
+                  </h2>
 
-                <div className="missing-sections-container">
+                  <div className="missing-sections-container">
 
-                  {report.missingSections.map(
-                    (section, i) => (
+                    {report.missingSections.map(
+                      (section, i) => (
 
-                      <div
-                        className="missing-section-card"
-                        key={i}
-                      >
+                        <div
+                          className="missing-section-card"
+                          key={i}
+                        >
 
-                        ⚠️ {section}
+                          ⚠️ {section}
 
-                      </div>
+                        </div>
 
-                    )
-                  )}
+                      )
+                    )}
+
+                  </div>
 
                 </div>
 
-              </div>
-
-            )}
+              )}
 
             {/* Content Strength */}
 
