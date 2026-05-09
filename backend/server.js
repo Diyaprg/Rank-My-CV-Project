@@ -4,9 +4,11 @@ const connectDB = require("./config/db");
 require("dotenv").config();
 
 const app = express();
-
 app.use(cors({
-  origin: "rank-my-kd3j5tqm5-soumya1709s-projects.vercel.app"
+  origin: [
+    "http://localhost:5173",
+    "https://rank-my-resume.vercel.app"  
+  ]
 }));
 app.use(express.json());
 app.use("/api/resume", require("./routes/resumeRoutes"));
