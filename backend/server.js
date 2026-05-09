@@ -7,7 +7,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://rank-my-resume.vercel.app"  
+    "https://rank-my-cv-project.vercel.app"
   ]
 }));
 app.use(express.json());
