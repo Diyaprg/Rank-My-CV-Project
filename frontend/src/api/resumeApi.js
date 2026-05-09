@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://rank-my-cv.onrender.com/api",
 });
 
 export const uploadResume = async (resumeFile, jobDescription) => {
