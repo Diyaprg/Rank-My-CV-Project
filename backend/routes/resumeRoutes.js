@@ -290,9 +290,7 @@ router.post(
           matchedKeywords.length +
           missingKeywords.length,
 
-        resumeText,
-
-        jobDescription
+        
 
       });
 
